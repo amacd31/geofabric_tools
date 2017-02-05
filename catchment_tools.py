@@ -35,7 +35,7 @@ def extract_catchment(hydro_id, catchment_index):
     catchment_ids = get_upstream(hydro_id, catchment_index)
     logger.debug("Selecting %s catchment sub-areas", len(catchment_ids))
 
-    sql_start = 'SELECT ST_Union(geometry) as geometry FROM catchments WHERE hydroid = '
+    sql_start = 'SELECT ST_Union(geometry) as geometry FROM ahgfcatchment WHERE hydroid = '
     sql = sql_start + ' OR hydroid = '.join([str(s) for s in catchment_ids])
 
     ogr_ds = ogr.Open('catchments.sqlite')
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     ogr_ds = ogr.Open('catchments.sqlite')
 
-    sql = "SELECT HydroID FROM catchments where ST_Within(MakePoint({0}, {1}), geometry);"
+    sql = "SELECT HydroID FROM ahgfcatchment where ST_Within(MakePoint({0}, {1}), geometry);"
     for outlet in args.catchment_outlets:
         lat, lon = [ float(x) for x in outlet.split(',') ]
         logger.info("Extracting: %s", outlet)
