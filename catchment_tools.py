@@ -77,3 +77,6 @@ if __name__ == '__main__':
         logger.debug("Using HydroID: %s", hydro_id)
 
         extract_catchment(hydro_id, catchment_index)
+
+    # Close the dataset (GDAL/OGR bindings aren't very Pythonic)
+    ogr_ds = None
