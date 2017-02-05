@@ -6,7 +6,7 @@ Data from the Bureau of Meterology: http://www.bom.gov.au/water/geofabric/index.
 
 Download and unzip: ftp://ftp.bom.gov.au/anon/home/geofabric/SH_Catchments_GDB_V2_1_1.zip
 
-Convert SH_Catchments.gdb into a spatiallite database::
+Convert SH_Catchments.gdb into a spatialite database::
 
     ogr2ogr -f SQLite -dsco SPATIALITE=YES catchments.sqlite SH_Catchments_GDB/SH_Catchments.gdb
 
