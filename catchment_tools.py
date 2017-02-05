@@ -40,10 +40,13 @@ def extract_catchment(hydro_id, catchment_index):
 
     ogr_ds = ogr.Open('catchments.sqlite')
     layer = ogr_ds.ExecuteSQL(sql)
+    logger.debug("Found %s layers", len(layer))
 
     geojson = layer[0].ExportToJson()
 
-    with open('{0}.json'.format(hydro_id), 'w') as out:
+    output_filename = '{0}.json'.format(hydro_id)
+    with open(output_filename, 'w') as out:
+        logger.info("Saving as: %s", output_filename)
         out.write(geojson)
 
     # Close the dataset (GDAL/OGR bindings aren't very Pythonic)
@@ -68,9 +71,9 @@ if __name__ == '__main__':
     sql = "SELECT HydroID FROM catchments where ST_Within(MakePoint({0}, {1}), geometry);"
     for outlet in args.catchment_outlets:
         lat, lon = [ float(x) for x in outlet.split(',') ]
-        logging.info("Extracting: %s", outlet)
+        logger.info("Extracting: %s", outlet)
 
         hydro_id = ogr_ds.ExecuteSQL(sql.format(lat, lon))[0]['hydroid']
-        logging.info("Found HydroID: %s", hydro_id)
+        logger.debug("Using HydroID: %s", hydro_id)
 
         extract_catchment(hydro_id, catchment_index)
