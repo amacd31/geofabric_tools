@@ -41,7 +41,7 @@ def get_upstream(ogr_ds, netnodeid):
 
     return upstream_ids
 
-def extract_catchment(ogr_ds, netnodeid, initial_subcatchment):
+def extract_catchment(ogr_ds, netnodeid, initial_subcatchment, catchment_id):
 
     catchment_ids = get_upstream(ogr_ds, netnodeid)
     logger.debug("Selecting %s catchment sub-areas", len(catchment_ids))
@@ -56,7 +56,7 @@ def extract_catchment(ogr_ds, netnodeid, initial_subcatchment):
     geojson = res[0].ExportToJson()
     ogr_ds.ReleaseResultSet(res)
 
-    output_filename = '{0}.json'.format(netnodeid)
+    output_filename = '{0}.json'.format(catchment_id)
     with open(output_filename, 'w') as out:
         logger.info("Saving as: %s", output_filename)
         out.write(geojson)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     #catchment_index = read_catchment_index('catchment_index.json')
 
     parser = argparse.ArgumentParser(description='Extract upstream catchment.')
-    parser.add_argument('catchment_outlets', metavar='LAT,LON', type=str, nargs='+', help='Coordinates of the catchment outlet.')
+    parser.add_argument('catchment_outlets', metavar='LAT,LON[:CATCHMENT_ID]', type=str, nargs='+', help='Coordinates of the catchment outlet. Takes optional :ID specifier for setting output filename to ID.json instead of defaulting to the initial sub-catchment Geofabric Hydro ID.')
     parser.add_argument('--debug', action='store_true', help='Enable debug output.')
 
     args = parser.parse_args()
@@ -120,9 +120,18 @@ if __name__ == '__main__':
     );
     """
     for outlet in args.catchment_outlets:
-        lat, lon = [ float(x) for x in outlet.split(',') ]
+        parts = outlet.split(':')
+
+        lat, lon = [ float(x) for x in parts[0].split(',') ]
         logger.info("Extracting: %s", outlet)
         initial_subcatchment = get_catchment_by_latlon(ogr_ds, lat, lon)
+
+        if len(parts) == 1:
+            catchment_id = initial_subcatchment
+        elif len(parts) == 2:
+            catchment_id = parts[1]
+        else:
+            raise ValueError("Unknown number of parts specified in {0}".format(outlet))
 
         res = ogr_ds.ExecuteSQL(sql.format(lat, lon))
         if len(res) > 0:
@@ -137,7 +146,7 @@ if __name__ == '__main__':
         netnode_id = get_network_node_by_stream(ogr_ds, hydro_id);
         logger.debug("Using NetNodeID: %s", netnode_id)
 
-        extract_catchment(ogr_ds, netnode_id, initial_subcatchment)
+        extract_catchment(ogr_ds, netnode_id, initial_subcatchment, catchment_id)
 
     # Close the dataset (GDAL/OGR bindings aren't very Pythonic)
     ogr_ds = None

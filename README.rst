@@ -29,3 +29,13 @@ Extract catchment boundary upstream from sub-catchment containing a latitude and
     real    0m4.067s
     user    0m2.904s
     sys     0m1.126s
+
+Optionally include an ID to use when saving the output file::
+
+    $ time python catchment_tools.py 148.821,-35.592:410730
+    INFO:__main__:Extracting: 148.821,-35.592
+    INFO:__main__:Saving as: 410730.json
+
+    real    0m5.810s
+    user    0m4.645s
+    sys     0m0.885s
