@@ -78,7 +78,7 @@ def get_catchment_by_latlon(ogr_ds, lat, lon):
     FROM
         ahgfcatchment AS C
     WHERE
-        MbrIntersects(C.geometry, MakePoint({0}, {1}))
+        ST_Within(MakePoint({0}, {1}), C.geometry)
     """
 
     res = ogr_ds.ExecuteSQL(sql.format(lon, lat))
