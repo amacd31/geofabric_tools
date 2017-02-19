@@ -138,6 +138,9 @@ if __name__ == '__main__':
             logger.debug(res[0].ExportToJson())
             hydro_id = res[0]['hydroid']
             ogr_ds.ReleaseResultSet(res)
+            if hydro_id is None:
+                logger.exception("No nearby stream.")
+                continue
         else:
             logger.exception("No nearby stream.")
             continue
