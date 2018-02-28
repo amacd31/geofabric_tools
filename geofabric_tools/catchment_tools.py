@@ -41,12 +41,24 @@ def get_upstream(ogr_ds, netnodeid):
 
     return upstream_ids
 
-def extract_catchment(ogr_ds, netnodeid, initial_subcatchment, catchment_id):
+def extract_catchment(ogr_ds, netnodeid, initial_subcatchment, catchment_id, exclude_sinks=False):
 
     catchment_ids = get_upstream(ogr_ds, netnodeid)
     logger.debug("Selecting %s catchment sub-areas", len(catchment_ids))
 
-    sql_start = 'SELECT ST_Union(geometry) as geometry FROM ahgfcatchment WHERE hydroid = {0} OR netnodeid IN ( '.format(initial_subcatchment)
+    if exclude_sinks:
+        select_stmt = 'ST_Union(geometry)'
+    else:
+        select_stmt = 'ST_BuildArea(ST_ExteriorRing(ST_Union(geometry)))'
+
+    sql_start = """SELECT {0} as geometry
+FROM
+    ahgfcatchment
+WHERE
+    hydroid = {1} OR netnodeid IN ( """.format(
+        select_stmt,
+        initial_subcatchment
+    )
     sql = sql_start + ', '.join([str(s) for s in catchment_ids]) + ')'
 
     res = ogr_ds.ExecuteSQL(sql)
@@ -125,6 +137,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract upstream catchment.')
     parser.add_argument('catchment_outlets', metavar='LAT,LON[:CATCHMENT_ID]', type=str, nargs='+', help='Coordinates of the catchment outlet. Takes optional :ID specifier for setting output filename to ID.json instead of defaulting to the initial sub-catchment Geofabric Hydro ID.')
     parser.add_argument('--debug', action='store_true', help='Enable debug output.')
+    parser.add_argument(
+        '--exclude-sinks',
+        action='store_true',
+        help='Exclude sinks from final catchment boundary. Can result in inner holes in the geometry. Without this option all sinks are assumed to be part of the catchment and only the exterior ring of the geometry is used.'
+    )
 
     args = parser.parse_args()
     if args.debug:
@@ -149,7 +166,7 @@ if __name__ == '__main__':
         netnode_id = get_netnode_id(ogr_ds, lat, lon)
         logger.debug("Using NetNodeID: %s", netnode_id)
 
-        extract_catchment(ogr_ds, netnode_id, initial_subcatchment, catchment_id)
+        extract_catchment(ogr_ds, netnode_id, initial_subcatchment, catchment_id, args.exclude_sinks)
 
     # Close the dataset (GDAL/OGR bindings aren't very Pythonic)
     ogr_ds = None

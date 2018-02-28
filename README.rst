@@ -39,3 +39,15 @@ Optionally include an ID to use when saving the output file::
     real    0m5.810s
     user    0m4.645s
     sys     0m0.885s
+
+By defaults all sinks inside the extracted boundary are assumed to be part of the catchment.
+A catchment boundary can be extracted with the sinks excluded from the resulting polygon by
+passing the --exclude-sinks option. For example::
+
+    $ time python geofabric_tools/catchment_tools.py --exclude-sinks 148.821,-35.592:excluded_sinks
+    INFO:__main__:Extracting: 148.821,-35.592:excluded_sinks
+    INFO:__main__:Saving as: excluded_sinks.json
+
+    real    0m6.915s
+    user    0m5.936s
+    sys     0m0.963s
