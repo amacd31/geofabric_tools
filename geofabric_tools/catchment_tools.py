@@ -88,22 +88,8 @@ def get_catchment_by_latlon(ogr_ds, lat, lon):
 
     return hydroid
 
-if __name__ == '__main__':
-    logging.basicConfig()
-    logger.setLevel(logging.INFO)
 
-    #catchment_index = read_catchment_index('catchment_index.json')
-
-    parser = argparse.ArgumentParser(description='Extract upstream catchment.')
-    parser.add_argument('catchment_outlets', metavar='LAT,LON[:CATCHMENT_ID]', type=str, nargs='+', help='Coordinates of the catchment outlet. Takes optional :ID specifier for setting output filename to ID.json instead of defaulting to the initial sub-catchment Geofabric Hydro ID.')
-    parser.add_argument('--debug', action='store_true', help='Enable debug output.')
-
-    args = parser.parse_args()
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-
-    ogr_ds = ogr.Open('geofabric.sqlite')
-
+def get_netnode_id(ogr_ds, lat, lon):
     sql = """
     SELECT
         Min(ST_Distance(MakePoint({0}, {1}), S.geometry)) AS distance, S.HydroID
@@ -119,6 +105,34 @@ if __name__ == '__main__':
             f_table_name='ahgfnetworkstream' AND search_frame=ST_Buffer(MakePoint({0}, {1}),0.001)
     );
     """
+
+    res = ogr_ds.ExecuteSQL(sql.format(lat, lon))
+    if len(res) > 0:
+        logger.debug(res[0].ExportToJson())
+        hydro_id = res[0]['hydroid']
+        ogr_ds.ReleaseResultSet(res)
+        if hydro_id is None:
+            logger.exception("No nearby stream.")
+    else:
+        logger.exception("No nearby stream.")
+    logger.debug("Using stream HydroID: %s", hydro_id)
+
+    return get_network_node_by_stream(ogr_ds, hydro_id);
+
+if __name__ == '__main__':
+    logging.basicConfig()
+    logger.setLevel(logging.INFO)
+
+    parser = argparse.ArgumentParser(description='Extract upstream catchment.')
+    parser.add_argument('catchment_outlets', metavar='LAT,LON[:CATCHMENT_ID]', type=str, nargs='+', help='Coordinates of the catchment outlet. Takes optional :ID specifier for setting output filename to ID.json instead of defaulting to the initial sub-catchment Geofabric Hydro ID.')
+    parser.add_argument('--debug', action='store_true', help='Enable debug output.')
+
+    args = parser.parse_args()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+
+    ogr_ds = ogr.Open('geofabric.sqlite')
+
     for outlet in args.catchment_outlets:
         parts = outlet.split(':')
 
@@ -133,20 +147,7 @@ if __name__ == '__main__':
         else:
             raise ValueError("Unknown number of parts specified in {0}".format(outlet))
 
-        res = ogr_ds.ExecuteSQL(sql.format(lat, lon))
-        if len(res) > 0:
-            logger.debug(res[0].ExportToJson())
-            hydro_id = res[0]['hydroid']
-            ogr_ds.ReleaseResultSet(res)
-            if hydro_id is None:
-                logger.exception("No nearby stream.")
-                continue
-        else:
-            logger.exception("No nearby stream.")
-            continue
-        logger.debug("Using stream HydroID: %s", hydro_id)
-
-        netnode_id = get_network_node_by_stream(ogr_ds, hydro_id);
+        netnode_id = get_netnode_id(ogr_ds, lat, lon)
         logger.debug("Using NetNodeID: %s", netnode_id)
 
         extract_catchment(ogr_ds, netnode_id, initial_subcatchment, catchment_id)
