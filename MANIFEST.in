@@ -1,0 +1,2 @@
+include versioneer.py
+include geofabric_tools/_version.py

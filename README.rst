@@ -22,7 +22,7 @@ Add some indexes to the spatialite database::
 
 Extract catchment boundary upstream from sub-catchment containing a latitude and longitude::
 
-    $ time python catchment_tools.py 148.821,-35.592
+    $ time python geofabric_tools/catchment_tools.py 148.821,-35.592
     INFO:__main__:Extracting: 148.821,-35.592
     INFO:__main__:Saving as: 1170184.json
 
@@ -32,7 +32,7 @@ Extract catchment boundary upstream from sub-catchment containing a latitude and
 
 Optionally include an ID to use when saving the output file::
 
-    $ time python catchment_tools.py 148.821,-35.592:410730
+    $ time python geofabric_tools/catchment_tools.py 148.821,-35.592:410730
     INFO:__main__:Extracting: 148.821,-35.592
     INFO:__main__:Saving as: 410730.json
 
