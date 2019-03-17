@@ -82,7 +82,7 @@ def get_catchment_by_latlon(ogr_ds, lat, lon):
         MbrIntersects(C.geometry, MakePoint({0}, {1}))
     """
 
-    res = ogr_ds.ExecuteSQL(sql.format(lat, lon))
+    res = ogr_ds.ExecuteSQL(sql.format(lon, lat))
     hydroid = res[0]['hydroid']
     ogr_ds.ReleaseResultSet(res)
 
@@ -106,7 +106,7 @@ def get_netnode_id(ogr_ds, lat, lon):
     );
     """
 
-    res = ogr_ds.ExecuteSQL(sql.format(lat, lon))
+    res = ogr_ds.ExecuteSQL(sql.format(lon, lat))
     if len(res) > 0:
         logger.debug(res[0].ExportToJson())
         hydro_id = res[0]['hydroid']
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     for outlet in args.catchment_outlets:
         parts = outlet.split(':')
 
-        lat, lon = [ float(x) for x in parts[0].split(',') ]
+        lon, lat = [ float(x) for x in parts[0].split(',') ]
         logger.info("Extracting: %s", outlet)
         initial_subcatchment = get_catchment_by_latlon(ogr_ds, lat, lon)
 
