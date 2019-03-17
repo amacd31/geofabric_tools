@@ -49,7 +49,6 @@ def extract_catchment(ogr_ds, netnodeid, initial_subcatchment, catchment_id):
     sql_start = 'SELECT ST_Union(geometry) as geometry FROM ahgfcatchment WHERE hydroid = {0} OR netnodeid IN ( '.format(initial_subcatchment)
     sql = sql_start + ', '.join([str(s) for s in catchment_ids]) + ')'
 
-    ogr_ds = ogr.Open('geofabric.sqlite')
     res = ogr_ds.ExecuteSQL(sql)
     logger.debug("Found %s result", len(res))
 
