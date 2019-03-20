@@ -41,7 +41,7 @@ def get_upstream(ogr_ds, netnodeid):
 
     return upstream_ids
 
-def extract_catchment(ogr_ds, netnodeid, initial_subcatchment, catchment_id, exclude_sinks=False):
+def extract_catchment(ogr_ds, netnodeid, initial_subcatchment, catchment_id, output_filename, exclude_sinks=False):
 
     catchment_ids = get_upstream(ogr_ds, netnodeid)
     logger.debug("Selecting %s catchment sub-areas", len(catchment_ids))
@@ -67,7 +67,6 @@ WHERE
     geojson = res[0].ExportToJson()
     ogr_ds.ReleaseResultSet(res)
 
-    output_filename = '{0}.json'.format(catchment_id)
     with open(output_filename, 'w') as out:
         logger.info("Saving as: %s", output_filename)
         out.write(geojson)
@@ -166,7 +165,7 @@ if __name__ == '__main__':
         netnode_id = get_netnode_id(ogr_ds, lat, lon)
         logger.debug("Using NetNodeID: %s", netnode_id)
 
-        extract_catchment(ogr_ds, netnode_id, initial_subcatchment, catchment_id, args.exclude_sinks)
+        extract_catchment(ogr_ds, netnode_id, initial_subcatchment, catchment_id, catchment_id + '.json', args.exclude_sinks)
 
     # Close the dataset (GDAL/OGR bindings aren't very Pythonic)
     ogr_ds = None
