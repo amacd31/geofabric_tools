@@ -136,6 +136,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract upstream catchment.')
     parser.add_argument('catchment_outlets', metavar='LAT,LON[:CATCHMENT_ID]', type=str, nargs='+', help='Coordinates of the catchment outlet. Takes optional :ID specifier for setting output filename to ID.json instead of defaulting to the initial sub-catchment Geofabric Hydro ID.')
     parser.add_argument('--debug', action='store_true', help='Enable debug output.')
+    parser.add_argument('--db', default="geofabric.sqlite", help="Geospatialite database containing the Australian Hyrdological Geospatial Fabric data.")
     parser.add_argument(
         '--exclude-sinks',
         action='store_true',
@@ -146,7 +147,7 @@ if __name__ == '__main__':
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    ogr_ds = ogr.Open('geofabric.sqlite')
+    ogr_ds = ogr.Open(args.db)
 
     for outlet in args.catchment_outlets:
         parts = outlet.split(':')
