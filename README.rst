@@ -4,7 +4,8 @@ Geofabric Tools
 Tools for working with the Australian Hydrological Geospatial Fabric (geofabric).
 Data from the Bureau of Meterology: http://www.bom.gov.au/water/geofabric/index.shtml
 
-Download and unzip: ftp://ftp.bom.gov.au/anon/home/geofabric/SH_Network_GDB_V2_1_1.zip
+Download and unzip: ftp://ftp.bom.gov.au/anon/home/geofabric/SH_Network_GDB_V3_2.zip
+or the previous release: ftp://ftp.bom.gov.au/anon/home/geofabric/version2/SH_Network_GDB_V2_1_1.zip
 
 Convert SH_Catchments.gdb into a spatialite database::
 
